@@ -19,11 +19,12 @@ Notes:
 (function($) {
 	var defaults = {
 		todayButton: true,		// Show the button to reset to today's date?
-		dateInput: true,		// Show input to manually enter a date. Calendar updates automatically when valid date entered (valid as in can be parsed by `new Date()`)
+		showInput: true,		// Show input
 		weekStart: 1,			// Start day of the week. 0 is Sunday, 6 for Saturday, 1 for Monday (default)
 		widget: true,
 		cellRatio: 1,
-		format: 'd/m/y'
+		format: 'd/m/y',
+		footer: true
 	};
 	
 	var now = new Date();
@@ -53,6 +54,10 @@ Notes:
 		return this.getFullYear() == now.getFullYear() 
 				&& this.getMonth() == now.getMonth() 
 				&& this.getDate() == now.getDate();
+	}
+
+	Date.prototype.isValid = function() {
+		return Object.prototype.toString.call(this) === "[object Date]" && !isNaN(this.getTime());
 	}
 
 	$.fn.supercal = function(method) {
@@ -169,7 +174,11 @@ Notes:
 				return table;
 			},
 			drawFooter: function(date) {
-				var footer = $('<div />');
+				var footer = $('<div />').addClass('supercal-footer');
+
+				if(options.footer == false) {
+					footer.hide();
+				}
 
 				if(options.todayButton) {
 					$('<button />')
@@ -179,17 +188,14 @@ Notes:
 						.appendTo(footer);
 				}
 
-				$('<input />')
-					.prop('type', 'text')
-					.val(pMethods.formatDate(date))
-					.addClass('supercal-input')
-					.appendTo(footer);
-
-				// $('<button />')
-				// 	.text('Set')
-				// 	.addClass('btn supercal-set')
-				// 	.prop('type', 'button')
-				// 	.appendTo(footer);
+				if(options.showInput) {
+					$('<input />')
+						.prop('type', 'text')
+						.prop('readonly', true)
+						.val(pMethods.formatDate(date))
+						.addClass('supercal-input')
+						.appendTo(footer);
+				}
 
 				return footer;
 			},
@@ -197,19 +203,9 @@ Notes:
 			formatDate: function(date) {		// Verrrry primitive date format function. Does what it needs to do...
 				return options.format
 					.replace('d', ('0' + date.getDate()).substr(-2))
-					.replace('m', ('0' + date.getMonth()).substr(-2))
+					.replace('m', ('0' + (date.getMonth() + 1)).substr(-2))
 					.replace('y', date.getFullYear().toString().substr(-2))
 					.replace('Y', date.getFullYear());
-			},
-			// Split out into helper object
-			isValidDate: function(date) {
-				return Object.prototype.toString.call(date) === "[object Date]" && !isNaN(date.getTime());
-			},
-			formattedToDate: function(str) {
-				dateParts = str.split(/[/.-]/);
-				formatParts = options.format.split(/[/.-]/);
-
-				console.log(dateParts, formatParts);
 			}
 		};
 
@@ -220,32 +216,36 @@ Notes:
 
 				// Bind events
 				$(document).on('click.supercal', '.supercal-container .change-month', function() {
-					methods.changeMonth.apply($(this).closest('.supercal-container'), [ $(this).hasClass('next-month') ? 1 : -1 ]);
-				});
-				$(document).on('click.supercal', '.supercal-today', function() {
-					var now = new Date();
+						methods.changeMonth.apply($(this).closest('.supercal-container'), [ $(this).hasClass('next-month') ? 1 : -1 ]);
+					})
+					.on('click.supercal', '.supercal-today', function() {
+						var now = new Date();
 
-					pMethods.drawCalendar.apply($(this).closest('.supercal-container'), [ now, true ]);
-				});
-				$(document).on('keyup.supercal', '.supercal-input', function(e) {
-					if(e.which === 27) {
-						container.children('.supercal-header').replaceWith(pMethods.drawHeader(now));
-						container.children('table').replaceWith(pMethods.drawMonth(now));
-					}
+						pMethods.drawCalendar.apply($(this).closest('.supercal-container'), [ now, true ]);
+					})
+					.on('keyup.supercal', '.supercal-input', function(e) {
+						if(e.which === 27) {
+							container.children('.supercal-header').replaceWith(pMethods.drawHeader(now));
+							container.children('table').replaceWith(pMethods.drawMonth(now));
+						}
 
-					var inputDate = new Date($(this).val());
-					var container = $(this).closest('.supercal-container');
+						var inputDate = new Date($(this).val());
+						var container = $(this).closest('.supercal-container');
 
-					pMethods.formattedToDate($(this).val());
+						pMethods.formattedToDate($(this).val());
+					})
+					.on('click.supercal', '.supercal-container td', function() {
+						var container = $(this).closest('.supercal-container');
+						var table = $(this).closest('table');
 
-					// if(pMethods.isValidDate(inputDate)) {
-					// 	console.log("valid");
+						table.find('.selected').removeClass('selected');
 
-					// 	// pMethods.drawHeader.apply($(this).closest('.supercal-container'), [ inputDate, true ]);
-					// 	container.children('.supercal-header').replaceWith(pMethods.drawHeader(inputDate));
-					// 	container.children('table').replaceWith(pMethods.drawMonth(inputDate));
-					// }
-				});
+						$(this).addClass('selected');
+
+						table.data('date', $(this).data('date'));
+
+						container.find('.supercal-footer').replaceWith(pMethods.drawFooter($(this).data('date')));
+					});
 
 				return this.each(function() {
 					var displayDate = new Date($(this).data('initial-date'));
@@ -277,8 +277,6 @@ Notes:
 			return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
 		} else if(typeof method === 'object' || !method) {
 			return methods.init.apply(this, arguments);
-		} else {
-			$.error('Method ' + method + ' does not exist on jQuery.supercal');
 		}
 	};
 })(jQuery);
