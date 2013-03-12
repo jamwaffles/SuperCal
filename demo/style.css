@@ -7,3 +7,52 @@ h1 {
 	margin-top: 0;
 	padding-top: 0;
 }
+
+.supercal {
+	width: 300px;
+}
+
+.supercal .supercal-header {
+	display: block;
+	line-height: 30px;
+	margin-bottom: 20px;
+}
+
+.supercal .supercal-footer {
+	width: 100%;
+}
+
+.supercal .supercal-header .prev-month {
+	float: left;
+}
+
+.supercal .supercal-header .next-month {
+	float: right;
+}
+
+.supercal .uneditable-input {
+	cursor: default;
+}
+
+.supercal table {
+	table-layout: fixed;
+}
+
+.supercal td {
+	cursor: pointer;
+}
+.supercal td:hover {
+	background: #2f96b4 !important;
+	color: #fff;
+}
+.supercal td.month-prev, .supercal td.month-next {
+	background: #eee;
+}
+.supercal td.selected {
+	background: #0088cc;
+	color: #fff;
+	font-weight: normal !important;
+}
+.supercal td.today {
+	font-weight: bold;
+}

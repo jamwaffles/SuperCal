@@ -24,7 +24,8 @@ Notes:
 		widget: true,
 		cellRatio: 1,
 		format: 'd/m/y',
-		footer: true
+		footer: true,
+		dayHeader: true
 	};
 	
 	var now = new Date();
@@ -81,11 +82,20 @@ Notes:
 			drawHeader: function(date) {
 				var header = $('<div />').addClass('supercal-header');
 
-				$('<button />').addClass('prev-month change-month').html('&laquo;').appendTo(header);
+				$('<button />')
+					.addClass('prev-month change-month btn')
+					.html('&laquo;')
+					.appendTo(header);
 
-				$('<span />').addClass('month').html(months[date.getMonth()] + ' ' + date.getFullYear()).appendTo(header);
+				$('<button />')
+					.addClass('next-month change-month btn')
+					.html('&raquo;')
+					.appendTo(header);
 
-				$('<button />').addClass('next-month change-month').html('&raquo;').appendTo(header);
+				$('<span />')
+					.addClass('month')
+					.append('<div>' + months[date.getMonth()] + ' ' + date.getFullYear() + '</div>')
+					.appendTo(header);
 
 				return header;
 			},
@@ -93,13 +103,32 @@ Notes:
 				var monthStart = new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0);
 				var days = [];
 				var rows = [];
-				var table = $('<table />');
+				var table = $('<table />').addClass('table table-bordered table-condensed');
 
 				var numPrevDays = monthStart.getDay() - options.weekStart;
 				var numCurrentDays = date.daysInMonth();
 				var numNextDays = 42 - numPrevDays - numCurrentDays;
 
 				var daysInLastMonth = date.daysInMonth(-1);
+
+				// Header
+				if(options.dayHeader) {
+					var tableHeader = $('<tr />');
+
+					for(var i = 0; i <= 6; i++) {
+						var day = i + options.weekStart;
+
+						if(day > 6) {
+							day = i - 5;
+						}
+
+						$('<th />')
+							.text(shortDays[day])
+							.appendTo(tableHeader);
+					}
+
+					table.append(tableHeader);
+				}
 
 				// Add previous month's days
 				for(var i = 1; i <= numPrevDays; i++) {
@@ -174,7 +203,7 @@ Notes:
 				return table;
 			},
 			drawFooter: function(date) {
-				var footer = $('<div />').addClass('supercal-footer');
+				var footer = $('<div />').addClass('supercal-footer input-prepend');
 
 				if(options.footer == false) {
 					footer.hide();
@@ -189,13 +218,16 @@ Notes:
 				}
 
 				if(options.showInput) {
-					$('<input />')
-						.prop('type', 'text')
-						.prop('readonly', true)
-						.val(pMethods.formatDate(date))
-						.addClass('supercal-input')
+					$('<span />')
+						.text(pMethods.formatDate(date))
+						.addClass('supercal-input uneditable-input span2')
 						.appendTo(footer);
 				}
+
+				$('<input />')
+					.prop('type', 'hidden')
+					.val(parseInt(date.getTime() / 1000), 10)
+					.appendTo(footer);
 
 				return footer;
 			},
@@ -215,27 +247,16 @@ Notes:
 				$(document).off('.supercal');		// Turn them all off
 
 				// Bind events
-				$(document).on('click.supercal', '.supercal-container .change-month', function() {
-						methods.changeMonth.apply($(this).closest('.supercal-container'), [ $(this).hasClass('next-month') ? 1 : -1 ]);
+				$(document).on('click.supercal', '.supercal .change-month', function() {
+						methods.changeMonth.apply($(this).closest('.supercal'), [ $(this).hasClass('next-month') ? 1 : -1 ]);
 					})
 					.on('click.supercal', '.supercal-today', function() {
 						var now = new Date();
 
-						pMethods.drawCalendar.apply($(this).closest('.supercal-container'), [ now, true ]);
+						pMethods.drawCalendar.apply($(this).closest('.supercal'), [ now, true ]);
 					})
-					.on('keyup.supercal', '.supercal-input', function(e) {
-						if(e.which === 27) {
-							container.children('.supercal-header').replaceWith(pMethods.drawHeader(now));
-							container.children('table').replaceWith(pMethods.drawMonth(now));
-						}
-
-						var inputDate = new Date($(this).val());
-						var container = $(this).closest('.supercal-container');
-
-						pMethods.formattedToDate($(this).val());
-					})
-					.on('click.supercal', '.supercal-container td', function() {
-						var container = $(this).closest('.supercal-container');
+					.on('click.supercal', '.supercal td', function() {
+						var container = $(this).closest('.supercal');
 						var table = $(this).closest('table');
 
 						table.find('.selected').removeClass('selected');
@@ -250,7 +271,7 @@ Notes:
 				return this.each(function() {
 					var displayDate = new Date($(this).data('initial-date'));
 
-					$(this).addClass('supercal-container');
+					$(this).addClass('supercal');
 
 					pMethods.drawCalendar.apply(this, arguments);
 				});
