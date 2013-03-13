@@ -18,20 +18,12 @@ h1 {
 	margin-bottom: 20px;
 }
 
-.supercal .supercal-footer {
-	width: 100%;
-}
-
 .supercal .supercal-header .prev-month {
 	float: left;
 }
 
 .supercal .supercal-header .next-month {
 	float: right;
-}
-
-.supercal .uneditable-input {
-	cursor: default;
 }
 
 .supercal table {
@@ -55,4 +47,15 @@ h1 {
 }
 .supercal td.today {
 	font-weight: bold;
+}
+
+/* Footer */
+.supercal .supercal-footer {
+	width: 100%;
+	display: table;
+}
+.supercal .supercal-footer span.supercal-input {
+	display: table-cell;
+	width: 100%;
+	cursor: default;
 }

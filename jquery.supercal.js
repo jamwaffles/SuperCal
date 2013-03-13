@@ -25,7 +25,8 @@ Notes:
 		cellRatio: 1,
 		format: 'd/m/y',
 		footer: true,
-		dayHeader: true
+		dayHeader: true,
+		mode: 'widget'			// 'widget' (default), 'tiny', 'popup', 'page'
 	};
 	
 	var now = new Date();
