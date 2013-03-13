@@ -77,7 +77,14 @@ Notes:
 				}
 
 				pMethods.drawHeader(selectedDate).appendTo(this);
-				pMethods.drawMonth(selectedDate).appendTo(this);
+
+				$('<div />')
+					.addClass('supercal-month')
+					.html(pMethods
+						.drawMonth(selectedDate)
+						.addClass('current'))
+					.appendTo(this);
+
 				pMethods.drawFooter(selectedDate).appendTo(this);
 			},
 			drawHeader: function(date) {
@@ -214,7 +221,7 @@ Notes:
 					$('<button />')
 						.text('Today')
 						.addClass('btn supercal-today')
-						.prop('type', 'button')
+						.attr('type', 'button')
 						.appendTo(footer);
 				}
 
@@ -256,7 +263,7 @@ Notes:
 
 						pMethods.drawCalendar.apply($(this).closest('.supercal'), [ now, true ]);
 					})
-					.on('click.supercal', '.supercal td', function() {
+					.on('click.supercal', '.supercal table.current td', function() {
 						var container = $(this).closest('.supercal');
 						var table = $(this).closest('table');
 
@@ -270,11 +277,9 @@ Notes:
 					});
 
 				return this.each(function() {
-					var displayDate = new Date($(this).data('initial-date'));
-
 					$(this).addClass('supercal');
 
-					pMethods.drawCalendar.apply(this, arguments);
+					pMethods.drawCalendar.apply(this);
 				});
 			},
 			changeMonth: function(month) {

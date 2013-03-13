@@ -16,6 +16,7 @@ h1 {
 	display: block;
 	line-height: 30px;
 	margin-bottom: 20px;
+	text-align: center;
 }
 
 .supercal .supercal-header .prev-month {
@@ -27,6 +28,7 @@ h1 {
 }
 
 .supercal table {
+	width: 300px;
 	table-layout: fixed;
 }
 
