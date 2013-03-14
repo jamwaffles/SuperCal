@@ -290,6 +290,7 @@ Notes:
 				var container = this;
 				var calendar = this.find('table');
 				var currentDate = calendar.data('date');
+				var calWidth = calendar.outerWidth(true);
 
 				if(typeof month === 'number') {
 					var newDay = Math.min(currentDate.daysInMonth(month), currentDate.getDate());		// 31st of March clamped to 28th Feb, for example
@@ -305,15 +306,23 @@ Notes:
 						$(this).replaceWith(pMethods.drawMonth(newDate).hide().fadeIn(options.animDuration));
 					});
 				} else if(options.transition == 'crossfade') {		// Crossfade
-					var newCalendar = pMethods.drawMonth(newDate).css({ opacity: 0, position: 'absolute', top: 0 });
+					var newCalendar = pMethods.drawMonth(newDate).css({ opacity: 0, position: 'absolute', top: 0 }).addClass('current');
 
-					calendar.after(newCalendar);
+					calendar.removeClass('current').after(newCalendar);
 
 					calendar.animate({ opacity: 0 }, options.animDuration);
 					newCalendar.animate({ opacity: 1 }, options.animDuration, function() {
 						calendar.remove();
 						$(this).css({ position: 'static' });
 					});
+				} else if(options.transition == 'carousel-horizontal') {
+					var newCalendar = pMethods.drawMonth(newDate).css({ left: calWidth }).addClass('current');
+
+					calendar.animate({ left: -calWidth });
+					calendar.after(newCalendar);
+
+					newCalendar.animate({ left: 0 });
+
 				} else {		// No transition
 					pMethods.drawCalendar.apply(container, [ newDate, true ]);
 				}
