@@ -293,7 +293,13 @@ Notes:
 					var newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + month, currentDate.getDate());
 				}
 
-				pMethods.drawCalendar.apply(container, [ newDate, true ]);
+				container.find('.supercal-header').replaceWith(pMethods.drawHeader(newDate));
+
+				container.find('table').fadeOut(200, function() {
+					$(this).replaceWith(pMethods.drawMonth(newDate).hide().fadeIn(200));
+				});
+
+				container.find('.supercal-footer').replaceWith(pMethods.drawFooter(newDate));
 			},
 			resize: function() {
 
