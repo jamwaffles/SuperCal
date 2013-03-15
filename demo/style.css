@@ -31,10 +31,12 @@ h1 {
 .supercal-month {
 	position: relative;
 	z-index: 0;
+	overflow: hidden;
 }
 .supercal table {
 	width: 300px;
 	table-layout: fixed;
+	background: #fff;
 }
 
 .supercal td {

@@ -80,12 +80,15 @@ Notes:
 
 				pMethods.drawHeader(selectedDate).appendTo(this);
 
+				var month = pMethods
+					.drawMonth(selectedDate)
+					.addClass('current');
+
 				$('<div />')
 					.addClass('supercal-month')
-					.html(pMethods
-						.drawMonth(selectedDate)
-						.addClass('current'))
-					.appendTo(this);
+					.html(month)
+					.appendTo(this)
+					.height(month.outerHeight(true));
 
 				pMethods.drawFooter(selectedDate).appendTo(this);
 			},
@@ -291,10 +294,12 @@ Notes:
 				var calendar = this.find('table');
 				var currentDate = calendar.data('date');
 				var calWidth = calendar.outerWidth(true);
+				var newDay, newDate, delta;
 
 				if(typeof month === 'number') {
-					var newDay = Math.min(currentDate.daysInMonth(month), currentDate.getDate());		// 31st of March clamped to 28th Feb, for example
-					var newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + month, newDay);
+					newDay = Math.min(currentDate.daysInMonth(month), currentDate.getDate());		// 31st of March clamped to 28th Feb, for example
+					newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + month, newDay);
+					delta = month;
 				}
 
 				container.find('.supercal-header').replaceWith(pMethods.drawHeader(newDate));
@@ -316,13 +321,14 @@ Notes:
 						$(this).css({ position: 'static' });
 					});
 				} else if(options.transition == 'carousel-horizontal') {
-					var newCalendar = pMethods.drawMonth(newDate).css({ left: calWidth }).addClass('current');
+					var newCalendar = pMethods.drawMonth(newDate).css({ left: delta * calWidth, position: 'absolute' }).addClass('current');
 
-					calendar.animate({ left: -calWidth });
+					calendar.css({ position: 'absolute' }).animate({ left: -(calWidth * delta) });
 					calendar.after(newCalendar);
 
-					newCalendar.animate({ left: 0 });
-
+					newCalendar.animate({ left: 0 }, function() {
+						calendar.remove();
+					});
 				} else {		// No transition
 					pMethods.drawCalendar.apply(container, [ newDate, true ]);
 				}
