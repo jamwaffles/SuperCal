@@ -1,21 +1,11 @@
 /**
  * Supercal 0.1
- * jQuery calendar widget/large view plugin
+ * jQuery calendar widget/large view plugin with Bootstrap compatibility
  *
  * James Waples 2013
  *
  * https://github.com/jamwaffles/SuperCal
  **/ 
-
-/*
-Notes:
-
-- Will have hidden input with currently selected date in it as a UNIX epoch (NOT microseconds)
-- Will also store date object in container
-- Each cell has date in `$.data('date', ...)` attribute
-- Default layout should pretty much work without CSS
-*/
-
 (function($) {
 	var defaults = {
 		todayButton: true,		// Show the button to reset to today's date?
@@ -40,24 +30,20 @@ Notes:
 
 	// Get the number of days in the current month (or next month if delta == 1, or prev month if delta == -1, etc)
 	Date.prototype.daysInMonth = function(delta) {
-		if(delta === undefined) {
-			delta = 0;
-		}
+		delta = delta === undefined ? 0 : delta;
 
-		var date = new Date(this.getFullYear(), this.getMonth() + 1 + delta, 0);
-
-		return date.getDate();
+		return new Date(this.getFullYear(), this.getMonth() + 1 + delta, 0).getDate();
 	}
 
 	// Is this date today? Can also test against another date when specifying `now`
-	Date.prototype.isToday = function(now) {
-		if(now === undefined) {
-			now = new Date();
+	Date.prototype.isDay = function(day) {
+		if(day === undefined) {
+			day = new Date();
 		}
 
-		return this.getFullYear() == now.getFullYear() 
-				&& this.getMonth() == now.getMonth() 
-				&& this.getDate() == now.getDate();
+		return this.getFullYear() == day.getFullYear() 
+			&& this.getMonth() == day.getMonth() 
+			&& this.getDate() == day.getDate();
 	}
 
 	Date.prototype.isValid = function() {
@@ -70,9 +56,7 @@ Notes:
 		// Private methods
 		var pMethods = {
 			drawCalendar: function(selectedDate, replace) {
-				if(!selectedDate) {
-					selectedDate = now;
-				}
+				selectedDate = selectedDate || now;
 
 				if(replace !== undefined && replace == true) {
 					this.empty();
@@ -80,14 +64,21 @@ Notes:
 
 				pMethods.drawHeader(selectedDate).appendTo(this);
 
+				var month = pMethods
+					.drawMonth(selectedDate)
+					.addClass('current');
+
 				$('<div />')
 					.addClass('supercal-month')
-					.html(pMethods
-						.drawMonth(selectedDate)
-						.addClass('current'))
-					.appendTo(this);
+					.html(month)
+					.appendTo(this)
+					.height(month.outerHeight(true));
 
 				pMethods.drawFooter(selectedDate).appendTo(this);
+
+				this.data('supercal', true);
+
+				return this;
 			},
 			drawHeader: function(date) {
 				var header = $('<div />').addClass('supercal-header');
@@ -110,6 +101,7 @@ Notes:
 				return header;
 			},
 			drawMonth: function(date) {
+				date = date || now;
 				var monthStart = new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0);
 				var days = [];
 				var rows = [];
@@ -159,16 +151,13 @@ Notes:
 						classes: ''
 					};
 
-					if(day.date.isToday()) {
-						day.classes = 'today';
-					}
+					// If this date is today's date, add the `today` class
+					day.classes = day.date.isDay() ? 'today' : '';
 
-					// Selected date?
-					if(day.date.isToday(date)) {
-						day.classes += ' selected';
-					}
+					// If this date is the one selected, add the `selected` class
+					day.classes += day.date.isDay(date) ? ' selected' : '';
 
-					days.push(day);
+					days.push(day);		// Add date to array
 				}
 
 				// Add next month's days
@@ -261,8 +250,6 @@ Notes:
 						methods.changeMonth.apply($(this).closest('.supercal'), [ $(this).hasClass('next-month') ? 1 : -1 ]);
 					})
 					.on('click.supercal', '.supercal-today', function() {
-						var now = new Date();
-
 						pMethods.drawCalendar.apply($(this).closest('.supercal'), [ now, true ]);
 					})
 					.on('click.supercal', '.supercal table.current td', function() {
@@ -285,50 +272,69 @@ Notes:
 				});
 			},
 			changeMonth: function(month) {
-				// Manually triggers month change event. Month can either be date object, or integer delta value for month
-
 				var container = this;
 				var calendar = this.find('table');
+				var newCalendar = pMethods.drawMonth(newDate).addClass('current');
 				var currentDate = calendar.data('date');
 				var calWidth = calendar.outerWidth(true);
+				var calHeight = calendar.outerHeight(true);
+				var newDay, newDate, delta, direction;
 
 				if(typeof month === 'number') {
-					var newDay = Math.min(currentDate.daysInMonth(month), currentDate.getDate());		// 31st of March clamped to 28th Feb, for example
-					var newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + month, newDay);
+					delta = month;
+					direction = delta > 0 ? 1 : -1;
+					newDay = Math.min(currentDate.daysInMonth(month), currentDate.getDate());		// 31st of March clamped to 28th Feb, for example
+					newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + direction, newDay);
+				}
+
+				switch(options.transition) {
+					case 'fade':
+						calendar.fadeOut(options.animDuration, function() {
+							$(this).replaceWith(newCalendar.hide().fadeIn(options.animDuration));
+						});
+					break;
+					case 'crossfade':		// Crossfade
+						newCalendar.css({ opacity: 0, position: 'absolute', top: 0 })
+
+						calendar.removeClass('current').after(newCalendar);
+
+						calendar.animate({ opacity: 0 }, options.animDuration);
+						newCalendar.animate({ opacity: 1 }, options.animDuration, function() {
+							calendar.remove();
+						});
+					break;
+					case 'carousel-horizontal':
+						newCalendar = pMethods.drawMonth(newDate).css({ left: direction * calWidth, position: 'absolute' })
+
+						calendar.css({ position: 'absolute' }).animate({ left: -(calWidth * direction) }).after(newCalendar);
+
+						newCalendar.animate({ left: 0 }, function() {
+							calendar.remove();
+						});
+					break;
+					case 'carousel-vertical':		// Vertical slide
+						newCalendar = pMethods.drawMonth(newDate).css({ top: direction * calHeight, position: 'absolute' })
+
+						calendar.css({ position: 'absolute' }).animate({ top: -(calHeight * direction) }).after(newCalendar);
+
+						newCalendar.animate({ top: 0 }, function() {
+							calendar.remove();
+						});
+					break;
+					default:		// No transition - default
+						pMethods.drawCalendar.apply(container, [ newDate, true ]);
+					break;
 				}
 
 				container.find('.supercal-header').replaceWith(pMethods.drawHeader(newDate));
 				container.find('.supercal-footer').replaceWith(pMethods.drawFooter(newDate));
-
-				// Fade
-				if(options.transition == 'fade') {
-					calendar.fadeOut(options.animDuration, function() {
-						$(this).replaceWith(pMethods.drawMonth(newDate).hide().fadeIn(options.animDuration));
-					});
-				} else if(options.transition == 'crossfade') {		// Crossfade
-					var newCalendar = pMethods.drawMonth(newDate).css({ opacity: 0, position: 'absolute', top: 0 }).addClass('current');
-
-					calendar.removeClass('current').after(newCalendar);
-
-					calendar.animate({ opacity: 0 }, options.animDuration);
-					newCalendar.animate({ opacity: 1 }, options.animDuration, function() {
-						calendar.remove();
-						$(this).css({ position: 'static' });
-					});
-				} else if(options.transition == 'carousel-horizontal') {
-					var newCalendar = pMethods.drawMonth(newDate).css({ left: calWidth }).addClass('current');
-
-					calendar.animate({ left: -calWidth });
-					calendar.after(newCalendar);
-
-					newCalendar.animate({ left: 0 });
-
-				} else {		// No transition
-					pMethods.drawCalendar.apply(container, [ newDate, true ]);
-				}
 			},
-			resize: function() {
+			date: function() {		// Return current selected date
+				if(!$(this).data('supercal')) {
+					return false;
+				}
 
+				return $(this).find('table').data('date');
 			}
 		};
 
