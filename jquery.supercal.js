@@ -294,12 +294,14 @@ Notes:
 				var calendar = this.find('table');
 				var currentDate = calendar.data('date');
 				var calWidth = calendar.outerWidth(true);
-				var newDay, newDate, delta;
+				var calHeight = calendar.outerHeight(true);
+				var newDay, newDate, delta, direction;
 
 				if(typeof month === 'number') {
 					newDay = Math.min(currentDate.daysInMonth(month), currentDate.getDate());		// 31st of March clamped to 28th Feb, for example
 					newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + month, newDay);
 					delta = month;
+					direction = delta > 0 ? 1 : -1;
 				}
 
 				container.find('.supercal-header').replaceWith(pMethods.drawHeader(newDate));
@@ -321,12 +323,21 @@ Notes:
 						$(this).css({ position: 'static' });
 					});
 				} else if(options.transition == 'carousel-horizontal') {
-					var newCalendar = pMethods.drawMonth(newDate).css({ left: delta * calWidth, position: 'absolute' }).addClass('current');
+					var newCalendar = pMethods.drawMonth(newDate).css({ left: direction * calWidth, position: 'absolute' }).addClass('current');
 
-					calendar.css({ position: 'absolute' }).animate({ left: -(calWidth * delta) });
+					calendar.css({ position: 'absolute' }).animate({ left: -(calWidth * direction) });
 					calendar.after(newCalendar);
 
 					newCalendar.animate({ left: 0 }, function() {
+						calendar.remove();
+					});
+				} else if(options.transition == 'carousel-vertical') {		// Vertical slide
+					var newCalendar = pMethods.drawMonth(newDate).css({ top: direction * calHeight, position: 'absolute' }).addClass('current');
+
+					calendar.css({ position: 'absolute' }).animate({ top: -(calHeight * direction) });
+					calendar.after(newCalendar);
+
+					newCalendar.animate({ top: 0 }, function() {
 						calendar.remove();
 					});
 				} else {		// No transition
