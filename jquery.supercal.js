@@ -26,7 +26,9 @@ Notes:
 		format: 'd/m/y',
 		footer: true,
 		dayHeader: true,
-		mode: 'widget'			// 'widget' (default), 'tiny', 'popup', 'page'
+		mode: 'widget',			// 'widget' (default), 'tiny', 'popup', 'page'
+		animDuration: 200,
+		transition: ''
 	};
 	
 	var now = new Date();
@@ -63,7 +65,7 @@ Notes:
 	}
 
 	$.fn.supercal = function(method) {
-		var options = $.extend(defaults, options);
+		var options = $.extend(defaults, method);
 
 		// Private methods
 		var pMethods = {
@@ -286,14 +288,44 @@ Notes:
 				// Manually triggers month change event. Month can either be date object, or integer delta value for month
 
 				var container = this;
-				var currentDate = this.find('table').data('date');
+				var calendar = this.find('table');
+				var currentDate = calendar.data('date');
+				var calWidth = calendar.outerWidth(true);
 
 				if(typeof month === 'number') {
 					var newDay = Math.min(currentDate.daysInMonth(month), currentDate.getDate());		// 31st of March clamped to 28th Feb, for example
-					var newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + month, currentDate.getDate());
+					var newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + month, newDay);
 				}
 
-				pMethods.drawCalendar.apply(container, [ newDate, true ]);
+				container.find('.supercal-header').replaceWith(pMethods.drawHeader(newDate));
+				container.find('.supercal-footer').replaceWith(pMethods.drawFooter(newDate));
+
+				// Fade
+				if(options.transition == 'fade') {
+					calendar.fadeOut(options.animDuration, function() {
+						$(this).replaceWith(pMethods.drawMonth(newDate).hide().fadeIn(options.animDuration));
+					});
+				} else if(options.transition == 'crossfade') {		// Crossfade
+					var newCalendar = pMethods.drawMonth(newDate).css({ opacity: 0, position: 'absolute', top: 0 }).addClass('current');
+
+					calendar.removeClass('current').after(newCalendar);
+
+					calendar.animate({ opacity: 0 }, options.animDuration);
+					newCalendar.animate({ opacity: 1 }, options.animDuration, function() {
+						calendar.remove();
+						$(this).css({ position: 'static' });
+					});
+				} else if(options.transition == 'carousel-horizontal') {
+					var newCalendar = pMethods.drawMonth(newDate).css({ left: calWidth }).addClass('current');
+
+					calendar.animate({ left: -calWidth });
+					calendar.after(newCalendar);
+
+					newCalendar.animate({ left: 0 });
+
+				} else {		// No transition
+					pMethods.drawCalendar.apply(container, [ newDate, true ]);
+				}
 			},
 			resize: function() {
 
