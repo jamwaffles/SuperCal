@@ -76,7 +76,8 @@
 
 				pMethods.drawFooter(selectedDate).appendTo(this);
 
-				this.data('supercal', true);
+				$(this).data('supercal', true);
+				$(this).data('date', selectedDate);
 
 				return this;
 			},
@@ -196,9 +197,6 @@
 					tr.appendTo(table);
 				}
 
-				// Store date in table
-				table.data('date', date);
-
 				return table;
 			},
 			drawFooter: function(date) {
@@ -260,8 +258,6 @@
 
 						$(this).addClass('selected');
 
-						table.data('date', $(this).data('date'));
-
 						container.find('.supercal-footer').replaceWith(pMethods.drawFooter($(this).data('date')));
 					});
 
@@ -272,13 +268,14 @@
 				});
 			},
 			changeMonth: function(month) {
+				var newDay, newDate, delta, direction, newCalendar;
+
 				var container = this;
 				var calendar = this.find('table');
-				var newCalendar = pMethods.drawMonth(newDate).addClass('current');
-				var currentDate = calendar.data('date');
+
+				var currentDate = container.data('date');
 				var calWidth = calendar.outerWidth(true);
 				var calHeight = calendar.outerHeight(true);
-				var newDay, newDate, delta, direction;
 
 				if(typeof month === 'number') {
 					delta = month;
@@ -287,6 +284,11 @@
 					newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + direction, newDay);
 				}
 
+				calendar.stop(true, true);
+				container.data('date', newDate);
+
+				newCalendar = pMethods.drawMonth(newDate).addClass('current');
+
 				switch(options.transition) {
 					case 'fade':
 						calendar.fadeOut(options.animDuration, function() {
@@ -294,37 +296,30 @@
 						});
 					break;
 					case 'crossfade':		// Crossfade
-						newCalendar.css({ opacity: 0, position: 'absolute', top: 0 })
-
 						calendar.removeClass('current').after(newCalendar);
-
 						calendar.animate({ opacity: 0 }, options.animDuration);
-						newCalendar.animate({ opacity: 1 }, options.animDuration, function() {
-							calendar.remove();
-						});
+
+						newCalendar.css({ opacity: 0, position: 'absolute', top: 0 }).animate({ opacity: 1 }, options.animDuration);
 					break;
 					case 'carousel-horizontal':
-						newCalendar = pMethods.drawMonth(newDate).css({ left: direction * calWidth, position: 'absolute' })
-
 						calendar.css({ position: 'absolute' }).animate({ left: -(calWidth * direction) }).after(newCalendar);
 
-						newCalendar.animate({ left: 0 }, function() {
-							calendar.remove();
-						});
+						newCalendar.css({ left: direction * calWidth, position: 'absolute' }).animate({ left: 0 });
 					break;
 					case 'carousel-vertical':		// Vertical slide
-						newCalendar = pMethods.drawMonth(newDate).css({ top: direction * calHeight, position: 'absolute' })
-
 						calendar.css({ position: 'absolute' }).animate({ top: -(calHeight * direction) }).after(newCalendar);
 
-						newCalendar.animate({ top: 0 }, function() {
-							calendar.remove();
-						});
+						newCalendar.css({ top: direction * calHeight, position: 'absolute' }).animate({ top: 0 });
 					break;
 					default:		// No transition - default
 						pMethods.drawCalendar.apply(container, [ newDate, true ]);
 					break;
 				}
+
+				// Remove old calendar
+				newCalendar.promise().done(function() {
+					container.find('table').not(newCalendar).remove();
+				});
 
 				container.find('.supercal-header').replaceWith(pMethods.drawHeader(newDate));
 				container.find('.supercal-footer').replaceWith(pMethods.drawFooter(newDate));
@@ -334,7 +329,7 @@
 					return false;
 				}
 
-				return $(this).find('table').data('date');
+				return $(this).data('date');
 			}
 		};
 
