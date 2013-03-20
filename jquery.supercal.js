@@ -248,7 +248,7 @@
 						methods.changeMonth.apply($(this).closest('.supercal'), [ $(this).hasClass('next-month') ? 1 : -1 ]);
 					})
 					.on('click.supercal', '.supercal-today', function() {
-						pMethods.drawCalendar.apply($(this).closest('.supercal'), [ now, true ]);
+						methods.changeMonth.apply($(this).closest('.supercal'), [ now ]);
 					})
 					.on('click.supercal', '.supercal table.current td', function() {
 						var container = $(this).closest('.supercal');
@@ -259,6 +259,7 @@
 						$(this).addClass('selected');
 
 						container.find('.supercal-footer').replaceWith(pMethods.drawFooter($(this).data('date')));
+						container.data('date', $(this).data('date'));
 					});
 
 				return this.each(function() {
@@ -268,7 +269,7 @@
 				});
 			},
 			changeMonth: function(month) {
-				var newDay, newDate, delta, direction, newCalendar;
+				var newDay, newDate, direction, newCalendar;
 
 				var container = this;
 				var calendar = this.find('table');
@@ -278,15 +279,16 @@
 				var calHeight = calendar.outerHeight(true);
 
 				if(typeof month === 'number') {
-					delta = month;
-					direction = delta > 0 ? 1 : -1;
+					direction = month > 0 ? 1 : -1;
 					newDay = Math.min(currentDate.daysInMonth(month), currentDate.getDate());		// 31st of March clamped to 28th Feb, for example
 					newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + direction, newDay);
+				} else if(month instanceof Date) {
+					direction = (month > currentDate) ? 1 : -1;
+					newDate = now;
 				}
 
 				calendar.stop(true, true);
 				container.data('date', newDate);
-
 				newCalendar = pMethods.drawMonth(newDate).addClass('current');
 
 				switch(options.transition) {
@@ -321,6 +323,7 @@
 					container.find('table').not(newCalendar).remove();
 				});
 
+				// Update header and footer
 				container.find('.supercal-header').replaceWith(pMethods.drawHeader(newDate));
 				container.find('.supercal-footer').replaceWith(pMethods.drawFooter(newDate));
 			},

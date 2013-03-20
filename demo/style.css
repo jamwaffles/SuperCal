@@ -52,7 +52,7 @@ h1 {
 .supercal td.selected {
 	background: #0088cc;
 	color: #fff;
-	font-weight: normal !important;
+	font-weight: normal;
 }
 .supercal td.today {
 	font-weight: bold;
