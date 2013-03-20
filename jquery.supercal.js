@@ -18,7 +18,8 @@
 		dayHeader: true,
 		mode: 'widget',			// 'widget' (default), 'tiny', 'popup', 'page'
 		animDuration: 200,
-		transition: ''
+		transition: '',
+		tableClasses: 'table table-bordered table-condensed'
 	};
 	
 	var now = new Date();
@@ -106,7 +107,7 @@
 				var monthStart = new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0);
 				var days = [];
 				var rows = [];
-				var table = $('<table />').addClass('table table-bordered table-condensed');
+				var table = $('<table />').addClass(options.tableClasses);
 
 				var numPrevDays = monthStart.getDay() - options.weekStart;
 				var numCurrentDays = date.daysInMonth();
@@ -263,7 +264,11 @@
 					});
 
 				return this.each(function() {
-					$(this).addClass('supercal');
+					$(this).addClass('supercal ' + options.transition);
+
+					if(options.transition) {
+						$(this).addClass('transition');
+					}
 
 					pMethods.drawCalendar.apply(this);
 				});
@@ -314,7 +319,7 @@
 						newCalendar.css({ top: direction * calHeight, position: 'absolute' }).animate({ top: 0 });
 					break;
 					default:		// No transition - default
-						pMethods.drawCalendar.apply(container, [ newDate, true ]);
+						calendar.replaceWith(newCalendar);
 					break;
 				}
 
