@@ -68,7 +68,6 @@
 
 				var month = pMethods
 					.drawMonth(selectedDate)
-					.data('element', this)
 					.addClass('current');
 
 				$('<div />')
@@ -81,6 +80,7 @@
 
 				$(this).data('supercal', true);
 				$(this).data('date', selectedDate);
+				$(this).data('element', this);
 
 				return this;
 			},
@@ -109,7 +109,6 @@
 
 				var month = pMethods
 					.drawMonth(selectedDate)
-					.data('element', this)
 					.addClass('current');
 
 				$('<div />')
@@ -119,9 +118,7 @@
 
 				$(this).data('supercal', true);
 				$(this).data('date', selectedDate);
-
-				div.data('supercal', true);
-				div.data('date', selectedDate);
+				div.data('element', this);
 
 				return this;
 			},
@@ -325,7 +322,7 @@
 					})
 					.on('click.supercal', '.supercal td', function() {
 						var thisDate = $(this).data('date');
-						var originalElement = $(this).closest('table').data('element');
+						var originalElement = $(this).closest('.supercal').data('element');
 
 						$(originalElement).trigger('dateselect', [ thisDate ]);
 					});
