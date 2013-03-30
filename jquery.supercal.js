@@ -19,7 +19,7 @@
 		mode: 'widget',			// 'widget' (default), 'tiny', 'popup', 'page'
 		animDuration: 200,
 		transition: '',
-		tableClasses: 'table table-bordered table-condensed'
+		tableClasses: 'table table-condensed'
 	};
 	
 	var now = new Date();
@@ -52,7 +52,7 @@
 	}
 
 	$.fn.supercal = function(method) {
-		var options = $.extend(defaults, method);
+		var options = $.extend(options, defaults, method);
 
 		// Private methods
 		var pMethods = {
@@ -240,7 +240,7 @@
 		};
 
 		var methods = {
-			init: function(options) {
+			init: function() {
 				// Events
 				$(document).off('.supercal');		// Turn them all off
 
@@ -270,7 +270,14 @@
 						$(this).addClass('transition');
 					}
 
-					pMethods.drawCalendar.apply(this);
+					switch(options.mode) {
+						case 'popup':
+							
+						break;
+						case 'widget':
+						default:
+							pMethods.drawCalendar.apply(this);
+					}
 				});
 			},
 			changeMonth: function(month) {
