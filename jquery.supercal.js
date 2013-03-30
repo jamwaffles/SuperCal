@@ -19,7 +19,8 @@
 		mode: 'widget',			// 'widget' (default), 'tiny', 'popup', 'page'
 		animDuration: 200,
 		transition: '',
-		tableClasses: 'table table-condensed'
+		tableClasses: 'table table-condensed',
+		hidden: true
 	};
 	
 	var now = new Date();
@@ -67,6 +68,7 @@
 
 				var month = pMethods
 					.drawMonth(selectedDate)
+					.data('element', this)
 					.addClass('current');
 
 				$('<div />')
@@ -79,6 +81,47 @@
 
 				$(this).data('supercal', true);
 				$(this).data('date', selectedDate);
+
+				return this;
+			},
+			drawPopupCalendar: function(selectedDate, replace) {
+				selectedDate = selectedDate || now;
+
+				var div;
+
+				if($(this).next('.supercal-popup').length) {
+					div = $(this).next('.supercal-popup');
+					div.empty();
+				} else {
+					div = $('<div />');
+					div
+						.addClass('supercal supercal-popup')
+						.width($(this).outerWidth(true));
+
+					$(this).after(div);
+				}
+
+				if(options.hidden) {
+					div.hide();
+				}
+
+				pMethods.drawHeader(selectedDate).appendTo(div);
+
+				var month = pMethods
+					.drawMonth(selectedDate)
+					.data('element', this)
+					.addClass('current');
+
+				$('<div />')
+					.addClass('supercal-month')
+					.html(month)
+					.appendTo(div);
+
+				$(this).data('supercal', true);
+				$(this).data('date', selectedDate);
+
+				div.data('supercal', true);
+				div.data('date', selectedDate);
 
 				return this;
 			},
@@ -245,7 +288,10 @@
 				$(document).off('.supercal');		// Turn them all off
 
 				// Bind events
-				$(document).on('click.supercal', '.supercal .change-month', function() {
+				$(document).on('click.supercal', '.supercal .change-month', function(e) {
+						e.preventDefault();
+						e.stopPropagation();
+
 						methods.changeMonth.apply($(this).closest('.supercal'), [ $(this).hasClass('next-month') ? 1 : -1 ]);
 					})
 					.on('click.supercal', '.supercal-today', function() {
@@ -261,6 +307,27 @@
 
 						container.find('.supercal-footer').replaceWith(pMethods.drawFooter($(this).data('date')));
 						container.data('date', $(this).data('date'));
+					})
+					// Popups
+					.on('click.supercal', '.supercal-popup-trigger', function(e) {
+						$(this).addClass('supercal-open');
+
+						$(this).next('.supercal-popup').show();
+					})
+					.on('click.supercal', function(e) {
+						var target = $(e.target);
+
+						if(!target.closest('.supercal').length) {
+							$('.supercal-popup-trigger.supercal-open')
+								.removeClass('supercal-open')
+								.next('.supercal-popup').hide();
+						}
+					})
+					.on('click.supercal', '.supercal td', function() {
+						var thisDate = $(this).data('date');
+						var originalElement = $(this).closest('table').data('element');
+
+						$(originalElement).trigger('dateselect', [ thisDate ]);
 					});
 
 				return this.each(function() {
@@ -272,7 +339,9 @@
 
 					switch(options.mode) {
 						case 'popup':
-							
+							$(this).addClass('supercal-popup-trigger');
+
+							pMethods.drawPopupCalendar.apply(this);
 						break;
 						case 'widget':
 						default:
@@ -289,6 +358,8 @@
 				var currentDate = container.data('date');
 				var calWidth = calendar.outerWidth(true);
 				var calHeight = calendar.outerHeight(true);
+
+				calendar.parent().height(calHeight);
 
 				if(typeof month === 'number') {
 					direction = month > 0 ? 1 : -1;
