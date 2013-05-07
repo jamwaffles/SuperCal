@@ -53,21 +53,21 @@
 	}
 
 	$.fn.supercal = function(method) {
-		var options = $.extend(options, defaults, method);
-
 		// Private methods
 		var pMethods = {
 			drawCalendar: function(selectedDate, replace) {
+				var options = $(this).data('options');
+
 				selectedDate = selectedDate || now;
 
 				if(replace !== undefined && replace == true) {
 					this.empty();
 				}
 
-				pMethods.drawHeader(selectedDate).appendTo(this);
+				pMethods.drawHeader(selectedDate, options).appendTo(this);
 
 				var month = pMethods
-					.drawMonth(selectedDate)
+					.drawMonth(selectedDate, options)
 					.addClass('current');
 
 				$('<div />')
@@ -76,7 +76,7 @@
 					.appendTo(this)
 					.height(month.outerHeight(true));
 
-				pMethods.drawFooter(selectedDate).appendTo(this);
+				pMethods.drawFooter(selectedDate, options).appendTo(this);
 
 				$(this).data('supercal', true);
 				$(this).data('date', selectedDate);
@@ -85,45 +85,54 @@
 				return this;
 			},
 			drawPopupCalendar: function(selectedDate, replace) {
+				var options = $(this).data('options');
+
 				selectedDate = selectedDate || now;
 
-				var div;
+				var container, calendar;
 
-				if($(this).next('.supercal-popup').length) {
-					div = $(this).next('.supercal-popup');
-					div.empty();
+				if($(this).parent('.supercal-popup-wrapper').length) {
+					container = $(this).parent();
+					calendar = $(this).parent().find('.supercal-popup');
+					calendar.empty();
 				} else {
-					div = $('<div />');
-					div
+					container = $('<div />').addClass('supercal-popup-wrapper');
+					calendar = $('<div />')
 						.addClass('supercal supercal-popup')
 						.width($(this).outerWidth(true));
 
-					$(this).after(div);
+					$(this).wrap(container);
 				}
+
+				$(this).after(calendar);
 
 				if(options.hidden) {
-					div.hide();
+					calendar.hide();
 				}
 
-				pMethods.drawHeader(selectedDate).appendTo(div);
+				pMethods.drawHeader(selectedDate, options).appendTo(calendar);
 
 				var month = pMethods
-					.drawMonth(selectedDate)
+					.drawMonth(selectedDate, options)
 					.addClass('current');
 
 				$('<div />')
 					.addClass('supercal-month')
 					.html(month)
-					.appendTo(div);
+					.appendTo(calendar);
 
-				$(this).data('supercal', true);
-				$(this).data('date', selectedDate);
-				div.data('element', this);
+				calendar.data('supercal', true);
+				calendar.data('date', selectedDate);
+				calendar.data('element', this);
+				calendar.data('options', options);
 
+				$(this).parent().wrap($('<div />').addClass('supercal-affix'));
+				
 				return this;
 			},
-			drawHeader: function(date) {
+			drawHeader: function(date, options) {
 				var header = $('<div />').addClass('supercal-header');
+				var monthNames = options.shortMonths ? shortMonths : months;
 
 				$('<button />')
 					.addClass('prev-month change-month btn')
@@ -137,12 +146,12 @@
 
 				$('<span />')
 					.addClass('month')
-					.append('<div>' + months[date.getMonth()] + ' ' + date.getFullYear() + '</div>')
+					.append('<div>' + monthNames[date.getMonth()] + ' ' + date.getFullYear() + '</div>')
 					.appendTo(header);
 
 				return header;
 			},
-			drawMonth: function(date) {
+			drawMonth: function(date, options) {
 				date = date || now;
 				var monthStart = new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0);
 				var days = [];
@@ -240,7 +249,7 @@
 
 				return table;
 			},
-			drawFooter: function(date) {
+			drawFooter: function(date, options) {
 				var footer = $('<div />').addClass('supercal-footer input-prepend');
 
 				if(options.footer == false) {
@@ -257,7 +266,7 @@
 
 				if(options.showInput) {
 					$('<span />')
-						.text(pMethods.formatDate(date))
+						.text(pMethods.formatDate(date, options))
 						.addClass('supercal-input uneditable-input span2')
 						.appendTo(footer);
 				}
@@ -270,7 +279,7 @@
 				return footer;
 			},
 			// Split out into helper object
-			formatDate: function(date) {		// Verrrry primitive date format function. Does what it needs to do...
+			formatDate: function(date, options) {		// Verrrry primitive date format function. Does what it needs to do...
 				return options.format
 					.replace('d', ('0' + date.getDate()).substr(-2))
 					.replace('m', ('0' + (date.getMonth() + 1)).substr(-2))
@@ -280,55 +289,55 @@
 		};
 
 		var methods = {
-			init: function() {
+			init: function(settings) {
+				var options = $.extend({}, defaults, settings);
+
 				// Events
-				$(document).off('.supercal');		// Turn them all off
+				if(!$(document).data('supercal-events')) {
+					$(document).on('click.supercal', '.supercal .change-month', function(e) {
+							e.preventDefault();
+							e.stopPropagation();
 
-				// Bind events
-				$(document).on('click.supercal', '.supercal .change-month', function(e) {
-						e.preventDefault();
-						e.stopPropagation();
+							methods.changeMonth.apply($(this).closest('.supercal'), [ $(this).hasClass('next-month') ? 1 : -1, $(this).closest('.supercal').data('options') ]);
+						})
+						.on('click.supercal', '.supercal-today', function() {
+							methods.changeMonth.apply($(this).closest('.supercal'), [ now, $(this).closest('.supercal').data('options') ]);
+						})
+						.on('click.supercal', '.supercal table.current td', function() {
+							var container = $(this).closest('.supercal');
+							var table = $(this).closest('table');
 
-						methods.changeMonth.apply($(this).closest('.supercal'), [ $(this).hasClass('next-month') ? 1 : -1 ]);
-					})
-					.on('click.supercal', '.supercal-today', function() {
-						methods.changeMonth.apply($(this).closest('.supercal'), [ now ]);
-					})
-					.on('click.supercal', '.supercal table.current td', function() {
-						var container = $(this).closest('.supercal');
-						var table = $(this).closest('table');
+							table.find('.selected').removeClass('selected');
 
-						table.find('.selected').removeClass('selected');
+							$(this).addClass('selected');
 
-						$(this).addClass('selected');
+							container.find('.supercal-footer').replaceWith(pMethods.drawFooter($(this).data('date'), $(this).closest('.supercal').data('options')));
+							container.data('date', $(this).data('date'));
+						})
+						// Popups
+						.on('click.supercal', '.supercal-popup-trigger', function(e) {
+							$(this).parent('.supercal-popup-wrapper').addClass('supercal-open').find('.supercal-popup').show();
+						})
+						.on('click.supercal', function(e) {
+							var target = $(e.target);
 
-						container.find('.supercal-footer').replaceWith(pMethods.drawFooter($(this).data('date')));
-						container.data('date', $(this).data('date'));
-					})
-					// Popups
-					.on('click.supercal', '.supercal-popup-trigger', function(e) {
-						$(this).addClass('supercal-open');
+							if(!target.closest('.supercal-popup-wrapper').length) {
+								$('.supercal-popup-wrapper.supercal-open').removeClass('supercal-open').find('.supercal-popup').hide();
+							}
+						})
+						.on('click.supercal', '.supercal td', function() {
+							var thisDate = $(this).data('date');
+							var originalElement = $(this).closest('.supercal').data('element');
 
-						$(this).next('.supercal-popup').show();
-					})
-					.on('click.supercal', function(e) {
-						var target = $(e.target);
+							$(originalElement).trigger('dateselect', [ thisDate ]);
+						});
 
-						if(!target.closest('.supercal').length) {
-							$('.supercal-popup-trigger.supercal-open')
-								.removeClass('supercal-open')
-								.next('.supercal-popup').hide();
-						}
-					})
-					.on('click.supercal', '.supercal td', function() {
-						var thisDate = $(this).data('date');
-						var originalElement = $(this).closest('.supercal').data('element');
-
-						$(originalElement).trigger('dateselect', [ thisDate ]);
-					});
+					$(document).data('supercal-evens', true);
+				}
 
 				return this.each(function() {
 					$(this).addClass('supercal ' + options.transition);
+					$(this).data('options', options);
 
 					if(options.transition) {
 						$(this).addClass('transition');
@@ -346,7 +355,7 @@
 					}
 				});
 			},
-			changeMonth: function(month) {
+			changeMonth: function(month, options) {
 				var newDay, newDate, direction, newCalendar;
 
 				var container = this;
@@ -369,7 +378,7 @@
 
 				calendar.stop(true, true);
 				container.data('date', newDate);
-				newCalendar = pMethods.drawMonth(newDate).addClass('current');
+				newCalendar = pMethods.drawMonth(newDate, options).addClass('current');
 
 				switch(options.transition) {
 					case 'fade':
@@ -404,8 +413,8 @@
 				});
 
 				// Update header and footer
-				container.find('.supercal-header').replaceWith(pMethods.drawHeader(newDate));
-				container.find('.supercal-footer').replaceWith(pMethods.drawFooter(newDate));
+				container.find('.supercal-header').replaceWith(pMethods.drawHeader(newDate, options));
+				container.find('.supercal-footer').replaceWith(pMethods.drawFooter(newDate, options));
 			},
 			date: function() {		// Return current selected date
 				if(!$(this).data('supercal')) {
