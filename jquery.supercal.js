@@ -5,8 +5,15 @@
  * James Waples 2013
  *
  * https://github.com/jamwaffles/SuperCal
- **/ 
-(function($) {
+ **/
+
+(function(factory) {
+	if(typeof define === 'function' && define.amd) {
+		define(['jquery'], factory);
+	} else {
+		factory(jQuery);
+	}
+}(function($) {
 	var defaults = {
 		todayButton: true,		// Show the button to reset to today's date?
 		showInput: true,		// Show input
@@ -73,8 +80,7 @@
 				$('<div />')
 					.addClass('supercal-month')
 					.html(month)
-					.appendTo(this)
-					.height(month.outerHeight(true));
+					.appendTo(this);
 
 				pMethods.drawFooter(selectedDate, options).appendTo(this);
 
@@ -347,11 +353,11 @@
 						case 'popup':
 							$(this).addClass('supercal-popup-trigger');
 
-							pMethods.drawPopupCalendar.apply(this);
+							pMethods.drawPopupCalendar.apply(this, options.date);
 						break;
 						case 'widget':
 						default:
-							pMethods.drawCalendar.apply(this);
+							pMethods.drawCalendar.call(this, options.date);
 					}
 				});
 			},
@@ -365,7 +371,7 @@
 				var calWidth = calendar.outerWidth(true);
 				var calHeight = calendar.outerHeight(true);
 
-				calendar.parent().height(calHeight);
+				calendar.parent().height(calHeight);		// Set height of calendar's container to height of table
 
 				if(typeof month === 'number') {
 					direction = month > 0 ? 1 : -1;
@@ -431,4 +437,4 @@
 			return methods.init.apply(this, arguments);
 		}
 	};
-})(jQuery);
+}));
