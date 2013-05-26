@@ -437,11 +437,13 @@
 				container.prev('.supercal-target').val($(this).data('date')).trigger('change');
 			},
 			date: function() {		// Return current selected date
-				if(!$(this).data('supercal')) {
-					return false;
+				if($(this).next('.supercal').length) {
+					return $(this).next('.supercal').data('date');
+				} else if($(this).data('supercal')) {
+					return $(this).data('date');
 				}
 
-				return $(this).data('date');
+				return false;
 			}
 		};
 
