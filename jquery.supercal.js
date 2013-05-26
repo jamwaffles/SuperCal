@@ -336,36 +336,47 @@
 							var originalElement = $(this).closest('.supercal').data('element');
 
 							$(originalElement).trigger('dateselect', [ thisDate ]);
+
+							// Set date on input element if it exists
+							$(originalElement).prev('.supercal-target').val($(this).data('date')).trigger('change');
 						});
 
-					$(document).data('supercal-evens', true);
+					$(document).data('supercal-events', true);
 				}
 
 				return this.each(function() {
-					$(this).addClass('supercal ' + options.transition);
-					$(this).data('options', options);
+					if($(this).is(':input')) {
+						var element = $('<div />');
+
+						$(this).addClass('supercal-target').after(element);
+					} else {
+						var element = this;
+					}
+
+					$(element).addClass('supercal ' + options.transition);
+					$(element).data('options', options);
 
 					if(options.transition) {
-						$(this).addClass('transition');
+						$(element).addClass('transition');
 					}
 
 					switch(options.mode) {
 						case 'popup':
-							$(this).addClass('supercal-popup-trigger');
+							$(element).addClass('supercal-popup-trigger');
 
-							pMethods.drawPopupCalendar.apply(this, options.date);
+							pMethods.drawPopupCalendar.apply(element, options.date);
 						break;
 						case 'widget':
 						default:
-							pMethods.drawCalendar.call(this, options.date);
+							pMethods.drawCalendar.call(element, options.date);
 					}
 				});
 			},
 			changeMonth: function(month, options) {
 				var newDay, newDate, direction, newCalendar;
 
-				var container = this;
-				var calendar = this.find('table');
+				var container = $(this);
+				var calendar = $(this).find('table');
 
 				var currentDate = container.data('date');
 				var calWidth = calendar.outerWidth(true);
@@ -421,6 +432,9 @@
 				// Update header and footer
 				container.find('.supercal-header').replaceWith(pMethods.drawHeader(newDate, options));
 				container.find('.supercal-footer').replaceWith(pMethods.drawFooter(newDate, options));
+
+				// Set date on input element if it exists
+				container.prev('.supercal-target').val($(this).data('date')).trigger('change');
 			},
 			date: function() {		// Return current selected date
 				if(!$(this).data('supercal')) {
