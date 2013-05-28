@@ -27,7 +27,8 @@
 		animDuration: 200,
 		transition: '',
 		tableClasses: 'table table-condensed',
-		hidden: true
+		hidden: true,
+		setOnMonthChange: true
 	};
 	
 	var now = new Date();
@@ -434,7 +435,9 @@
 				container.find('.supercal-footer').replaceWith(pMethods.drawFooter(newDate, options));
 
 				// Set date on input element if it exists
-				container.prev('.supercal-target').val($(this).data('date')).trigger('change');
+				if(options.setOnMonthChange) {
+					container.prev('.supercal-target').val($(this).data('date')).trigger('change');
+				}
 			},
 			date: function() {		// Return current selected date
 				if($(this).next('.supercal').length) {
