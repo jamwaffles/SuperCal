@@ -28,7 +28,8 @@
 		transition: '',
 		tableClasses: 'table table-condensed',
 		hidden: true,
-		setOnMonthChange: true
+		setOnMonthChange: true,
+		condensed: false
 	};
 	
 	var now = new Date();
@@ -179,7 +180,7 @@
 						var day = i + options.weekStart;
 
 						if(day > 6) {
-							day = i - 5;
+							day = i - 6;
 						}
 
 						$('<th />')
@@ -359,6 +360,10 @@
 
 					if(options.transition) {
 						$(element).addClass('transition');
+					}
+
+					if(options.condensed) {
+						$(element).addClass('condensed');
 					}
 
 					switch(options.mode) {
