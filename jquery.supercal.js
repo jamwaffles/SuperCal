@@ -1,5 +1,5 @@
 /**
- * Supercal 0.1
+ * Supercal 0.1.1
  * jQuery calendar widget/large view plugin with Bootstrap compatibility
  *
  * James Waples 2013
@@ -325,6 +325,9 @@
 						// Popups
 						.on('click.supercal', '.supercal-popup-trigger', function(e) {
 							$(this).parent('.supercal-popup-wrapper').addClass('supercal-open').find('.supercal-popup').show();
+
+							// Close other calendars
+							$('.supercal-popup-wrapper.supercal-open').not($(this).parent()).removeClass('supercal-open').find('.supercal-popup').hide();
 						})
 						.on('click.supercal', function(e) {
 							var target = $(e.target);
@@ -336,11 +339,12 @@
 						.on('click.supercal', '.supercal td', function() {
 							var thisDate = $(this).data('date');
 							var originalElement = $(this).closest('.supercal').data('element');
+							var formattedDate = pMethods.formatDate($(this).data('date'), $(this).closest('.supercal').data('options'));
 
 							$(originalElement).trigger('dateselect', [ thisDate ]);
 
 							// Set date on input element if it exists
-							$(originalElement).prev('.supercal-target').val($(this).data('date')).trigger('change');
+							$(originalElement).children('.supercal-popup-trigger').val(formattedDate).trigger('change');
 						});
 
 					$(document).data('supercal-events', true);
