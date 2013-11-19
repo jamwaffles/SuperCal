@@ -14,6 +14,7 @@ Loads of 'em. All events should be bound to the overall container
 - Element events
 	- Bound input change event updates calendar
 	- Month back/forward button
+		- Holding shift and clicking goes back/forward a _year_ instead
 	- Year input change event
 	- Month table `<td>` click
 	- Hour/minute/second spinner button up/down click
