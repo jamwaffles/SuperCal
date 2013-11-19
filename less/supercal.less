@@ -1,0 +1,76 @@
+@import 'bootstrap/variables';
+
+.supercal {
+	@spacing: 10px;
+
+	// Input (only if wrapped in container)
+	.supercal-target {
+		border-bottom-left-radius: 0;
+		border-bottom-right-radius: 0;
+
+		&:focus + .sc-wrapper {
+			border-color: @input-border-focus;
+		}
+	}
+
+	// The element that wraps any dynamic Supercal HTML
+	.sc-wrapper {
+		padding: @spacing !important;
+		border: 1px solid @input-border;
+		border-top: none;
+		border-bottom-left-radius: @input-border-radius;
+		border-bottom-right-radius: @input-border-radius;
+		background: #fff;
+
+		&.sc-focus {
+			border-color: @input-border-focus;
+		}
+	}
+
+	// D/M/Y picker
+	.sc-month-wrapper {
+		.sc-header {
+			.sc-month-prev {
+				float: left;
+				margin-right: @spacing;
+			}
+			.sc-month-next {
+				float: right;
+				margin-left: @spacing;
+			}
+		}
+
+		// Month day tables
+		.sc-month {
+			margin-top: @spacing;
+
+			table {
+				margin: 0;
+			}
+		}
+
+		td {
+			cursor: pointer;
+
+			&:hover {
+				background: mix(@body-bg, @btn-primary-bg, 50%);
+			}			
+		}
+
+		// Cell styles
+		.sc-month-prev, .sc-month-next {
+			background: @gray-lighter;
+		}
+		.sc-today {
+			font-weight: bold;
+		}
+		.sc-selected {
+			background: @btn-primary-bg !important;
+			color: @btn-primary-color !important;
+		}
+	}
+
+	.sc-footer {
+		margin-top: @spacing;
+	}
+}
