@@ -1,29 +1,109 @@
 <!DOCTYPE html>
 
 <html>
-	<head>
-		<title>SuperCal 0.1 Example</title>
+<head>
+	<title>Supercal Example</title>
 
-		<link href="bootstrap.min.css" rel="stylesheet" media="screen">
+	<link href="bootstrap.min.css" rel="stylesheet" media="screen">
 
-		<link rel="stylesheet" href="../supercal.css">
-	</head>
+	<link rel="stylesheet" href="../supercal.css">
 
-	<body>
-		<h1>SuperCal Examples</h1>
+	<style type="text/css">
+		body {
+			padding: 20px;
+		}
+	</style>
+</head>
 
-		<h2>Basic example</h2>
+<body>
+	<h1>SuperCal Examples</h1>
 
-		<p>Simple calendar widget with default options</p>
+	<h2>Basic example</h2>
 
-		<div class="example1"></div>
+	<p>Simple calendar widget with default options</p>
 
-		<script src="jquery-1.9.1.js"></script>
+	<div class="example1"></div>
 
-		<script src="../jquery.supercal.js"></script>
+	<!-- Widget example HTML -->
+	<div class="supercal">
+		<input type="text" class="supercal-target form-control">
 
-		<script>
-			$('.example1').supercal();
-		</script>
-	</body>
+		<div class="sc-wrapper">
+			<div class="row">
+				<div class="sc-month-wrapper col-md-12">
+					<div class="sc-header">
+						<button type="button" class="sc-month-prev btn btn-default">&laquo;</button>
+						<button type="button" class="sc-month-next btn btn-default">&raquo;</button>
+
+						<span class="input-group">
+							<span class="sc-month-display input-group-addon">Nov</span>
+							<input type="number" class="sc-year-display form-control" placeholder="Year" min="1970">
+							<span class="input-group-btn">
+								<button class="btn btn-default sc-today" type="button">Today</button>
+							</span>
+						</span>
+					</div>
+
+					<div class="sc-month">
+						<table class="table table-condensed table-bordered">
+							<head>
+								<tr>
+									<th>Mon</th>
+									<th>Tue</th>
+									<th>Wed</th>
+									<th>Thu</th>
+									<th>Fri</th>
+									<th>Sat</th>
+									<th>Sun</th>
+								</tr>
+							</head>
+
+							<tbody>
+								<tr>
+									<td class="sc-month-prev" data-epoch=""><span>10</span></td>
+									<td class="sc-month-prev" data-epoch=""><span>10</span></td>
+									<td class="sc-month-prev" data-epoch=""><span>10</span></td>
+									<td class="sc-month-prev" data-epoch=""><span>10</span></td>
+									<td class="sc-month-prev" data-epoch=""><span>10</span></td>
+									<td data-epoch=""><span>10</span></td>
+									<td data-epoch=""><span>10</span></td>
+								</tr>
+
+								<tr>
+									<td data-epoch=""><span>10</span></td>
+									<td class="sc-selected" data-epoch=""><span>10</span></td>
+									<td data-epoch=""><span>10</span></td>
+									<td class="sc-today" data-epoch=""><span>10</span></td>
+									<td data-epoch=""><span>10</span></td>
+									<td data-epoch=""><span>10</span></td>
+									<td data-epoch=""><span>10</span></td>
+								</tr>
+
+								<tr>
+									<td class="sc-month-next"><span>20</span></td>
+									<td class="sc-month-next"><span>20</span></td>
+									<td class="sc-month-next"><span>20</span></td>
+									<td class="sc-month-next"><span>20</span></td>
+									<td class="sc-month-next"><span>20</span></td>
+									<td class="sc-month-next"><span>20</span></td>
+									<td class="sc-month-next"><span>20</span></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Popup example HTML -->
+
+	<script src="jquery-1.9.1.js"></script>
+
+	<script src="../jquery.supercal.js"></script>
+
+	<script>
+		$('.example1').supercal();
+	</script>
+</body>
 </html>
