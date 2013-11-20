@@ -105,11 +105,11 @@
 							<input type="text" placeholder="MM" class="form-control">
 							<button type="button" class="sc-spin-down btn btn-default">-</button>
 						</div>
-						<!-- <div class="col-xs-4 sc-spinner sc-second">
+						<div class="col-xs-4 sc-spinner sc-second">
 							<button type="button" class="sc-spin-up btn btn-default">+</button>
 							<input type="text" placeholder="SS" class="form-control">
 							<button type="button" class="sc-spin-down btn btn-default">-</button>
-						</div> -->
+						</div>
 					</div>
 				</div>
 			</div>
@@ -118,11 +118,19 @@
 
 	<!-- Popup example HTML -->
 
-	<script src="jquery-1.9.1.js"></script>
+	<script src="jquery.js"></script>
 
-	<script src="../jquery.supercal.js"></script>
+	<script src="../supercal.js"></script>
 
 	<script>
+		$('.example1').supercal({
+			startDay: 3
+		});
+
+		$('.example1').supercal({
+			startDay: 0
+		});
+
 		$('.example1').supercal();
 	</script>
 </body>
