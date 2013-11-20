@@ -70,7 +70,43 @@
 		}
 	}
 
-	.sc-footer {
-		margin-top: @spacing;
+	.sc-time-wrapper {
+		.sc-spinner {
+			+ .sc-spinner {
+				position: relative;
+
+				&:before {
+					content: ":";
+					line-height: 20px;
+					top: 50%;
+					margin-top: -10px;
+					left: -1px;
+					font-weight: bold;
+					position: absolute;
+				}
+			}
+
+			button {
+				display: block;
+				width: 100%;
+
+				&.sc-spin-up {
+					border-bottom-left-radius: 0;
+					border-bottom-right-radius: 0;
+					border-bottom: 0;
+				}
+
+				&.sc-spin-down {
+					border-top-left-radius: 0;
+					border-top-right-radius: 0;
+					border-top: 0;
+				}
+			}
+
+			input {
+				border-radius: 0;
+				text-align: center;
+			}
+		}
 	}
 }
