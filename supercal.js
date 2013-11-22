@@ -14,6 +14,10 @@
 		factory(jQuery);
 	}
 }(function($) {
+	var now = new Date;
+	var shortDays = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
+	var shortMonths = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep-', 'Oct', 'Nov', 'Dec' ];
+
 	var defaults = {
 		startDay: 1,		// Start day. 0 = Sunday, 1 = Monday, etc
 	};
@@ -76,7 +80,7 @@
 		} else {
 			return new Day(new Date(this.date.getFullYear(), this.date.getMonth(), this.date.daysInMonth() + index));
 		}
-	}
+	};
 
 	// Produce a 2D array of cells to create a calendar table for this month
 	Month.prototype.cells = function() {
@@ -115,24 +119,129 @@
 		}
 
 		return this.grid;
+	};
+
+	// HTML rendering methods
+	var html = {
+		// Render a month view
+		month: function(month) {
+			month.cells();
+
+			var thisMonthIndex = month.date.getMonth();
+
+			var table = document.createElement('table');
+			
+			// Generate header
+			var header = document.createElement('thead');
+
+			for(var i = 0; i < 7; i++) {
+				var th = document.createElement('th');
+
+				var index = month.options.startDay + i;
+
+				// Wrap around to beginning of weekdays array if out of bounds
+				if(index > 6) {
+					index -= 7;
+				}
+
+				th.innerHTML = shortDays[index];
+
+				header.appendChild(th);
+			}
+			
+			table.appendChild(header);
+
+			// Loop through 2D array of days and make main table
+			for(var row = 0; row < 6; row++) {
+				var tr = document.createElement('tr');
+
+				for(var col = 0; col < 7; col++) {
+					var day = month.grid[row][col];
+					var td = document.createElement('td');
+					var span = document.createElement('span');
+
+					span.innerHTML = day.date.getDate();
+
+					// Class names for cell: prev/next month, today, etc
+					if(day.date.getMonth() === month.date.getMonth() - 1) {
+						td.className = 'sc-month-prev';
+					} else if(day.date.getMonth() === month.date.getMonth() + 1) {
+						td.className = 'sc-month-next';
+					} else if(day.date.getDate() === now.getDate()) {
+						td.className = 'sc-today';
+					}
+
+					td.appendChild(span);
+					tr.appendChild(td);
+				}
+
+				table.appendChild(tr);
+			}
+
+			return table;
+		}
+	};
+
+	// Supercal instance
+	function Supercal(container, options) {
+		this.options = options;
+		this.$el = container;
+		this.el = this.$el[0];
+
+		// Already initialised
+		if(this.$el.data('supercal') !== undefined) {
+			return;
+		}
+
+		if(this.options.date === undefined) {
+			this.options.date = new Date;
+		}
+
+		var month = html.month(new Month(this.options.date, this.options));
+
+		// Datepicker HTML
+		// var elements = this.generateHtml();
+		var datepicker = this.datepicker();
+
+		this.el.appendChild(datepicker);
+
+		this.$el.data('supercal', this);
 	}
 
-	// Generate a 2D array of `Date` objects ready to generate an HTML table from
-	// function tableDates(inputDate) {
-	// 	var selectedDate;
+	// Generate the HTML for the datepicker component
+	Supercal.prototype.datepicker = function() {
+		var template = '<div class="sc-header"></div><div class="sc-month"></div>';
+		var skeleton = document.createElement('div');
+		skeleton.className = 'sc-month-wrapper';
 
-	// 	if(inputDate !== undefined) {
-	// 		selectedDate = inputDate;
-	// 	} else {
-	// 		selectedDate = new Date();
-	// 	}
+		skeleton.innerHTML = template;
 
-	// 	var lastMonth = new Month(new Date(inputDate.getFullYear(), inputDate.getMonth() - 1, inputDate.getDate()));
-	// 	var thisMonth = new Month(inputDate);
-	// 	var nextMonth = new Month(new Date(inputDate.getFullYear(), inputDate.getMonth() + 1, inputDate.getDate()));
+		skeleton.children[0].appendChild(this.header());
 
+		return skeleton;
+	};
 
-	// }
+	// Generate table header and month/year nav
+	Supercal.prototype.header = function() {
+		var template = '<button type="button" class="sc-month-prev btn btn-default">&laquo;</button><button type="button" class="sc-month-next btn btn-default">&raquo;</button>\
+						<span class="input-group">\
+							<span class="sc-month-display input-group-addon"></span>\
+							<input type="number" class="sc-year-display form-control" placeholder="Year" min="1970">\
+							<span class="input-group-btn"><button class="btn btn-default sc-today" type="button">Today</button></span>\
+						</span>';
+		var header = document.createElement('div');
+		header.className = 'sc-header';
+
+		header.innerHTML = template;
+
+		var month = header.children[2].children[0];
+		var year = header.children[2].children[1];
+
+		month.innerText = shortMonths[this.options.date.getMonth()];
+		year.value - this.options.date.getFullYear();
+
+		return header;
+	};
 
 	var methods = {
 		// Create a Supercal instance for this element from scratch
@@ -140,10 +249,7 @@
 		init: function(passedOptions) {
 			var options = $.extend({}, defaults, passedOptions);
 
-			var foo = new Month(new Date(), options);
-
-			console.log(foo.cells());
-			// console.log(options);
+			var calendar = new Supercal(this, options);
 		}
 	};
 
