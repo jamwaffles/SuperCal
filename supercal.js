@@ -130,9 +130,11 @@
 			var thisMonthIndex = month.date.getMonth();
 
 			var table = document.createElement('table');
+			table.className = 'table table-condensed table-bordered';
 			
 			// Generate header
 			var header = document.createElement('thead');
+			var headerRow = document.createElement('tr');
 
 			for(var i = 0; i < 7; i++) {
 				var th = document.createElement('th');
@@ -146,10 +148,14 @@
 
 				th.innerHTML = shortDays[index];
 
-				header.appendChild(th);
+				headerRow.appendChild(th);
 			}
 			
+			header.appendChild(headerRow);
+
 			table.appendChild(header);
+
+			var tbody = document.createElement('tbody');
 
 			// Loop through 2D array of days and make main table
 			for(var row = 0; row < 6; row++) {
@@ -175,10 +181,35 @@
 					tr.appendChild(td);
 				}
 
-				table.appendChild(tr);
+				tbody.appendChild(tr);
 			}
 
+			table.appendChild(tbody);
+
 			return table;
+		},
+
+		// Generate the month nav and year input for a calendar table
+		monthHeader: function(month) {
+			var wrapper = document.createElement('div');
+			wrapper.className = 'sc-header';
+
+			var template = '<button type="button" class="sc-month-prev btn btn-default">&laquo;</button><button type="button" class="sc-month-next btn btn-default">&raquo;</button>\
+						<span class="input-group">\
+							<span class="sc-month-display input-group-addon"></span>\
+							<input type="number" class="sc-year-display form-control" placeholder="Year" min="1970">\
+							<span class="input-group-btn"><button class="btn btn-default sc-today" type="button">Today</button></span>\
+						</span>';
+
+			wrapper.innerHTML = template;
+
+			var monthDisplay = wrapper.children[2].children[0];
+			var yearInput = wrapper.children[2].children[1];
+
+			monthDisplay.innerText = month.date.getDate();
+			yearInput.value = month.date.getFullYear();
+
+			return wrapper;
 		}
 	};
 
@@ -197,50 +228,49 @@
 			this.options.date = new Date;
 		}
 
-		var month = html.month(new Month(this.options.date, this.options));
+		var wrapper = document.createElement('div');
+		var wrapperRow = document.createElement('div');
+		wrapper.className = 'sc-wrapper';
+		wrapperRow.className = 'row';
+
+		wrapper.appendChild(wrapperRow);
 
 		// Datepicker HTML
 		// var elements = this.generateHtml();
 		var datepicker = this.datepicker();
 
-		this.el.appendChild(datepicker);
+		wrapperRow.appendChild(datepicker);
+
+		this.el.appendChild(wrapper);
+
+
 
 		this.$el.data('supercal', this);
 	}
 
 	// Generate the HTML for the datepicker component
 	Supercal.prototype.datepicker = function() {
-		var template = '<div class="sc-header"></div><div class="sc-month"></div>';
-		var skeleton = document.createElement('div');
-		skeleton.className = 'sc-month-wrapper';
+		var container = document.createElement('div');
+		container.className = 'sc-month-wrapper';
 
-		skeleton.innerHTML = template;
+		if(this.options.time) {
+			container.className += ' col-md-8';
+		} else {
+			container.className += ' col-md-12';
+		}
 
-		skeleton.children[0].appendChild(this.header());
+		// Header
+		container.appendChild(html.monthHeader(new Month(this.options.date, this.options)));
 
-		return skeleton;
-	};
+		// Table
+		var monthContainer = document.createElement('div');
+		monthContainer.className = 'sc-month';
 
-	// Generate table header and month/year nav
-	Supercal.prototype.header = function() {
-		var template = '<button type="button" class="sc-month-prev btn btn-default">&laquo;</button><button type="button" class="sc-month-next btn btn-default">&raquo;</button>\
-						<span class="input-group">\
-							<span class="sc-month-display input-group-addon"></span>\
-							<input type="number" class="sc-year-display form-control" placeholder="Year" min="1970">\
-							<span class="input-group-btn"><button class="btn btn-default sc-today" type="button">Today</button></span>\
-						</span>';
-		var header = document.createElement('div');
-		header.className = 'sc-header';
+		monthContainer.appendChild(html.month(new Month(this.options.date, this.options)));
 
-		header.innerHTML = template;
+		container.appendChild(monthContainer);
 
-		var month = header.children[2].children[0];
-		var year = header.children[2].children[1];
-
-		month.innerText = shortMonths[this.options.date.getMonth()];
-		year.value - this.options.date.getFullYear();
-
-		return header;
+		return container;
 	};
 
 	var methods = {
