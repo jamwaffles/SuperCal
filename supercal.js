@@ -211,7 +211,7 @@
 			var monthDisplay = wrapper.children[2].children[0];
 			var yearInput = wrapper.children[2].children[1];
 
-			monthDisplay.innerText = shortMonths[month.date.getDate() + 1];
+			monthDisplay.innerText = shortMonths[month.date.getDate() - 1];
 			yearInput.value = month.date.getFullYear();
 
 			return wrapper;
