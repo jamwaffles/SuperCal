@@ -27,6 +27,9 @@
 		
 		return d.getDate();
 	}
+	Date.prototype.clone = function() {
+		return new Date(this.getTime());
+	}
 
 	// Class defining a single table cell. Should be stored in an array in an instance of `Month`
 	function Day(date) {
@@ -55,14 +58,14 @@
 		this.days = [];
 		this.grid = [];
 		this.options = options;
-		this.date = new Date(date.getTime());
+		this.date = date.clone();
 
 		this.date.setHours(0);
 		this.date.setMinutes(0);
 		this.date.setSeconds(0);
 		this.date.setMilliseconds(0);
 
-		var day = date;
+		var day = date.clone();
 		var monthNumber = day.getMonth();			// The number of this month, used to break `while()` loop
 		day.setDate(1);			// Reset to the first day
 
@@ -84,12 +87,14 @@
 
 	// Produce a 2D array of cells to create a calendar table for this month
 	Month.prototype.cells = function() {
-		var day = new Date(this.date.getTime());
+		var day = this.date.clone();
 		day.setDate(1);
 
-		var numDaysPreceding = day.getDay() - this.options.startDay;
+		var numDaysPreceding = 7 - (day.getDay() + this.options.startDay);
 		var numDaysAfter = numDaysPreceding + this.date.daysInMonth() - 42;
 
+		// var prevMonth;
+		// var nextMonth;
 		var prevMonth = new Month(new Date(this.date.getFullYear(), this.date.getMonth() - 1, this.date.getDate(), 0, 0, 0, 0));
 		var nextMonth = new Month(new Date(this.date.getFullYear(), this.date.getMonth() + 1, this.date.getDate(), 0, 0, 0, 0));
 
@@ -171,7 +176,7 @@
 					// Class names for cell: prev/next month, today, etc
 					if(day.date.getMonth() === month.date.getMonth() - 1) {
 						td.className = 'sc-month-prev';
-					} else if(day.date.getMonth() === month.date.getMonth() + 1) {
+					} else if(day.date.getMonth() === month.date.getMonth() + 1  || day.date.getMonth() === 0) {
 						td.className = 'sc-month-next';
 					} else if(day.date.getDate() === now.getDate()) {
 						td.className = 'sc-today';
@@ -206,7 +211,7 @@
 			var monthDisplay = wrapper.children[2].children[0];
 			var yearInput = wrapper.children[2].children[1];
 
-			monthDisplay.innerText = month.date.getDate();
+			monthDisplay.innerText = shortMonths[month.date.getDate() + 1];
 			yearInput.value = month.date.getFullYear();
 
 			return wrapper;
