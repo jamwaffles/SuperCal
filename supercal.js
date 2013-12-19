@@ -211,7 +211,7 @@
 			var monthDisplay = wrapper.children[2].children[0];
 			var yearInput = wrapper.children[2].children[1];
 
-			monthDisplay.innerText = shortMonths[month.date.getDate() - 1];
+			monthDisplay.innerText = shortMonths[month.date.getMonth()];
 			yearInput.value = month.date.getFullYear();
 
 			return wrapper;
@@ -241,13 +241,16 @@
 		wrapper.appendChild(wrapperRow);
 
 		// Datepicker HTML
-		// var elements = this.generateHtml();
 		var datepicker = this.datepicker();
 
 		wrapperRow.appendChild(datepicker);
 
 		this.el.appendChild(wrapper);
 
+		// Add timepicker if specified in options
+
+
+		// Set up DOM events
 
 
 		this.$el.data('supercal', this);
