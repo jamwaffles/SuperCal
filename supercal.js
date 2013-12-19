@@ -251,7 +251,28 @@
 
 
 		// Set up DOM events
+		this.$el.on('click', '.sc-month-prev', function(e) {
+			e.preventDefault();
+			console.log("prev");
+		}).on('click', '.sc-month-next', function(e) {
+			e.preventDefault();
+			console.log('next');
+		}).on('change', '.sc-year-display', function() {
+			if(this.value.length !== 4 || !parseInt(this.value)) {
+				return;
+			}
 
+			// Redraw header with new year
+
+			// Redraw calendar table with same month, new year
+		}).on('click', '.sc-table-current td', function() {
+			// Mark this cell as selected
+
+			// Set this instance's current date to selected cell
+
+		}).on('click', '.sc-today', function(e) {
+			// Reset calendar to today's date. Leave time alone if it's displayed
+		});
 
 		this.$el.data('supercal', this);
 	}
