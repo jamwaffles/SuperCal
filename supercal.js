@@ -215,6 +215,24 @@
 			yearInput.value = month.date.getFullYear();
 
 			return wrapper;
+		},
+
+		// Generate HTML for a spinner with a pre-filled value
+		spinner: function(value, placeholder) {
+			var template = '<button type="button" class="sc-spin-up btn btn-default">+</button>\
+							<input type="text" class="form-control">\
+							<button type="button" class="sc-spin-down btn btn-default">-</button>';
+
+			var container = document.createElement('div');
+			container.className = 'col-xs-4 sc-spinner';
+
+			container.innerHTML = template;
+
+			var input = container.children[1];
+			input.placeholder = placeholder;
+			input.value = ("0" + value).substr(-2);
+
+			return container;
 		}
 	};
 
@@ -248,7 +266,11 @@
 		this.el.appendChild(wrapper);
 
 		// Add timepicker if specified in options
+		if(this.options.time === true) {
+			var timepicker = this.timepicker();
 
+			wrapperRow.appendChild(timepicker);
+		}
 
 		// Set up DOM events
 		this.$el.on('click', '.sc-month-prev', function(e) {
@@ -282,7 +304,7 @@
 		var container = document.createElement('div');
 		container.className = 'sc-month-wrapper';
 
-		if(this.options.time) {
+		if(this.options.time === true) {
 			container.className += ' col-md-8';
 		} else {
 			container.className += ' col-md-12';
@@ -301,6 +323,22 @@
 
 		return container;
 	};
+
+	Supercal.prototype.timepicker = function() {
+		var container = document.createElement('div');
+		container.className = 'sc-time-wrapper col-md-4';
+
+		var row = document.createElement('div');
+		row.className = 'row';
+
+		container.appendChild(row);
+
+		row.appendChild(html.spinner(this.options.date.getHours(), 'HH'));
+		row.appendChild(html.spinner(this.options.date.getMinutes(), 'MM'));
+		row.appendChild(html.spinner(this.options.date.getSeconds(), 'SS'));
+
+		return container;
+	}
 
 	var methods = {
 		// Create a Supercal instance for this element from scratch
