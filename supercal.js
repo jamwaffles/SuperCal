@@ -172,9 +172,9 @@
 					span.innerHTML = day.date.getDate();
 
 					// Class names for cell: prev/next month, today, etc
-					if(day.date.getMonth() === month.date.getMonth() - 1) {
+					if(day.date.getMonth() === month.date.getMonth() - 1 || month.date.getMonth() === 0 && day.date.getMonth() === 11) {
 						td.className = 'sc-month-prev';
-					} else if(day.date.getMonth() === month.date.getMonth() + 1  || day.date.getMonth() === 0) {
+					} else if(day.date.getMonth() === month.date.getMonth() + 1) {
 						td.className = 'sc-month-next';
 					} else if(day.date.getDate() === now.getDate()) {
 						td.className = 'sc-today';
