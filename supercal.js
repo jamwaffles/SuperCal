@@ -90,7 +90,7 @@
 		var day = this.date.clone();
 		day.setDate(1);
 
-		var numDaysPreceding = 7 - (day.getDay() + this.options.startDay);
+		var numDaysPreceding = day.getDay() - this.options.startDay;
 		var numDaysAfter = numDaysPreceding + this.date.daysInMonth() - 42;
 
 		// var prevMonth;
@@ -131,8 +131,6 @@
 		// Render a month view
 		month: function(month) {
 			month.cells();
-
-			var thisMonthIndex = month.date.getMonth();
 
 			var table = document.createElement('table');
 			table.className = 'table table-condensed table-bordered';
