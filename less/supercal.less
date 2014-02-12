@@ -1,31 +1,29 @@
 @import 'bootstrap/variables';
 
-.supercal {
+.sc-wrapper {
 	@spacing: 10px;
 
 	// Input (only if wrapped in container)
-	.supercal-target {
-		border-bottom-left-radius: 0;
-		border-bottom-right-radius: 0;
+	// .supercal-target {
+	// 	border-bottom-left-radius: 0;
+	// 	border-bottom-right-radius: 0;
 
-		&:focus + .sc-wrapper {
-			border-color: @input-border-focus;
-		}
-	}
+	// 	&:focus + .sc-wrapper {
+	// 		border-color: @input-border-focus;
+	// 	}
+	// }
 
 	// The element that wraps any dynamic Supercal HTML
-	.sc-wrapper {
+	// .sc-wrapper {
 		padding: @spacing !important;
 		border: 1px solid @input-border;
-		border-top: none;
-		border-bottom-left-radius: @input-border-radius;
-		border-bottom-right-radius: @input-border-radius;
+		border-radius: @border-radius-base;
 		background: #fff;
 
 		&.sc-focus {
 			border-color: @input-border-focus;
 		}
-	}
+	// }
 
 	// D/M/Y picker
 	.sc-month-wrapper {
