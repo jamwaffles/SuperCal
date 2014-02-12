@@ -93,12 +93,12 @@
 		var numDaysPreceding = day.getDay() - this.options.startDay;
 		var numDaysAfter = numDaysPreceding + this.date.daysInMonth() - 42;
 
-		// var prevMonth;
-		// var nextMonth;
 		var prevMonth = new Month(new Date(this.date.getFullYear(), this.date.getMonth() - 1, this.date.getDate(), 0, 0, 0, 0));
 		var nextMonth = new Month(new Date(this.date.getFullYear(), this.date.getMonth() + 1, this.date.getDate(), 0, 0, 0, 0));
 
 		var index = 1;
+
+		this.grid = [];
 
 		for(var row = 0; row < 6; row++) {
 			var rowCells = [];
@@ -165,18 +165,18 @@
 				var tr = document.createElement('tr');
 
 				for(var col = 0; col < 7; col++) {
-					var day = month.grid[row][col];
+					var day = month.grid[row][col].date;
 					var td = document.createElement('td');
 					var span = document.createElement('span');
 
-					span.innerHTML = day.date.getDate();
+					span.innerHTML = day.getDate();
 
 					// Class names for cell: prev/next month, today, etc
-					if(day.date.getMonth() === month.date.getMonth() - 1 || month.date.getMonth() === 0 && day.date.getMonth() === 11) {
+					if(day.getMonth() === month.date.getMonth() - 1 || month.date.getMonth() === 0 && day.getMonth() === 11) {
 						td.className = 'sc-month-prev';
-					} else if(day.date.getMonth() === month.date.getMonth() + 1) {
+					} else if(day.getMonth() === month.date.getMonth() + 1) {
 						td.className = 'sc-month-next';
-					} else if(day.date.getDate() === now.getDate()) {
+					} else if(day.getDate() === now.getDate()) {
 						td.className = 'sc-today';
 					}
 
@@ -249,6 +249,8 @@
 			this.options.date = new Date;
 		}
 
+		this.month = new Month(this.options.date, this.options);
+
 		var wrapper = document.createElement('div');
 		var wrapperRow = document.createElement('div');
 		wrapper.className = 'sc-wrapper';
@@ -270,21 +272,24 @@
 			wrapperRow.appendChild(timepicker);
 		}
 
+		var cal = this;
+
 		// Set up DOM events
 		this.$el.on('click', '.sc-month-prev', function(e) {
 			e.preventDefault();
-			console.log("prev");
+			
+			cal.stepMonth(-1);
 		}).on('click', '.sc-month-next', function(e) {
 			e.preventDefault();
-			console.log('next');
-		}).on('change', '.sc-year-display', function() {
+			
+			cal.stepMonth(+1);
+		}).on('change keyup', '.sc-year-display', function() {
 			if(this.value.length !== 4 || !parseInt(this.value)) {
 				return;
 			}
 
 			// Redraw header with new year
-
-			// Redraw calendar table with same month, new year
+			cal.setYear(this.value);
 		}).on('click', '.sc-table-current td', function() {
 			// Mark this cell as selected
 
@@ -309,15 +314,15 @@
 		}
 
 		// Header
-		container.appendChild(html.monthHeader(new Month(this.options.date, this.options)));
+		container.appendChild(html.monthHeader(this.month));
 
 		// Table
-		var monthContainer = document.createElement('div');
-		monthContainer.className = 'sc-month';
+		this.monthContainer = document.createElement('div');
+		this.monthContainer.className = 'sc-month';
 
-		monthContainer.appendChild(html.month(new Month(this.options.date, this.options)));
+		this.monthContainer.appendChild(html.month(this.month));
 
-		container.appendChild(monthContainer);
+		container.appendChild(this.monthContainer);
 
 		return container;
 	};
@@ -336,6 +341,31 @@
 		row.appendChild(html.spinner(this.options.date.getSeconds(), 'SS'));
 
 		return container;
+	}
+
+	// Change month by delta from current month
+	Supercal.prototype.stepMonth = function(delta) {
+		this.month.date.setMonth(this.month.date.getMonth() + delta);
+
+		this.setDate();
+	}
+
+	// Set new year
+	Supercal.prototype.setYear = function(year) {
+		var newDate = this.month.date.clone();
+		newDate.setFullYear(year);
+
+		this.setDate(newDate);
+	}
+
+	// Change the month displayed (and date selected)
+	Supercal.prototype.setDate = function() {
+		// Set year in year spinner
+		// TODO
+
+		// Change calendar
+		this.monthContainer.innerHTML = '';
+		this.monthContainer.appendChild(html.month(this.month));
 	}
 
 	var methods = {
