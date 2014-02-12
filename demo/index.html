@@ -25,6 +25,8 @@
 	<div class="example1"></div>
 
 	<!-- Widget example HTML -->
+	<hr>
+	<h2>Mockup:</h2>
 	<div class="supercal">
 		<input type="text" class="supercal-target form-control">
 
@@ -95,12 +97,12 @@
 
 				<div class="sc-time-wrapper col-md-4">
 					<div class="row">
-						<div class="col-xs-6 sc-spinner sc-hour">
+						<div class="col-xs-4 sc-spinner sc-hour">
 							<button type="button" class="sc-spin-up btn btn-default">+</button>
 							<input type="text" placeholder="HH" class="form-control">
 							<button type="button" class="sc-spin-down btn btn-default">-</button>
 						</div>
-						<div class="col-xs-6 sc-spinner sc-minute">
+						<div class="col-xs-4 sc-spinner sc-minute">
 							<button type="button" class="sc-spin-up btn btn-default">+</button>
 							<input type="text" placeholder="MM" class="form-control">
 							<button type="button" class="sc-spin-down btn btn-default">-</button>
@@ -124,14 +126,9 @@
 
 	<script>
 		$('.example1').supercal({
-			startDay: 3
+			startDay: 1,
+			time: true
 		});
-
-		$('.example1').supercal({
-			startDay: 0
-		});
-
-		$('.example1').supercal();
 	</script>
 </body>
 </html>
