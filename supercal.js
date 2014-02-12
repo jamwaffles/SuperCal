@@ -16,7 +16,7 @@
 }(function($) {
 	var now = new Date;
 	var shortDays = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
-	var shortMonths = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep-', 'Oct', 'Nov', 'Dec' ];
+	var shortMonths = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
 
 	var defaults = {
 		startDay: 1,		// Start day. 0 = Sunday, 1 = Monday, etc
@@ -360,8 +360,9 @@
 
 	// Change the month displayed (and date selected)
 	Supercal.prototype.setDate = function() {
-		// Set year in year spinner
-		// TODO
+		// Set month/year in calendar header
+		this.$el.find('.sc-month-display').text(shortMonths[this.month.date.getMonth()]);
+		this.$el.find('.sc-year-display').val(this.month.date.getFullYear());
 
 		// Change calendar
 		this.monthContainer.innerHTML = '';
