@@ -129,11 +129,15 @@
 	// HTML rendering methods
 	var html = {
 		// Render a month view
-		month: function(month) {
+		month: function(month, otherClasses) {
 			month.cells();
 
 			var table = document.createElement('table');
 			table.className = 'table table-condensed table-bordered';
+
+			if(otherClasses !== undefined) {
+				table.className += ' ' + otherClasses;
+			}
 			
 			// Generate header
 			var header = document.createElement('thead');
@@ -179,6 +183,14 @@
 					} else if(day.getDate() === now.getDate()) {
 						td.className = 'sc-today';
 					}
+
+					// Select this cell if it's the same as the passed date
+					if(month.date.getFullYear() === day.getFullYear() && month.date.getMonth() === day.getMonth() && month.date.getDate() === day.getDate()) {
+						td.className += ' sc-selected';
+					}
+
+					// Store date in DOM element
+					td.scDate = day;
 
 					td.appendChild(span);
 					tr.appendChild(td);
@@ -291,12 +303,23 @@
 			// Redraw header with new year
 			cal.setYear(this.value);
 		}).on('click', '.sc-table-current td', function() {
-			// Mark this cell as selected
-
 			// Set this instance's current date to selected cell
+			if(typeof this.scDate !== 'object') {
+				console.warn('No date object bound to element. Cannot set date.');
 
+				return;
+			}
+
+			console.log("Hello");
+
+			cal.month.date = this.scDate;
+
+			cal.setDate();
 		}).on('click', '.sc-today', function(e) {
 			// Reset calendar to today's date. Leave time alone if it's displayed
+			cal.month.date = now.clone();
+
+			cal.setDate();
 		});
 
 		this.$el.data('supercal', this);
@@ -320,7 +343,7 @@
 		this.monthContainer = document.createElement('div');
 		this.monthContainer.className = 'sc-month';
 
-		this.monthContainer.appendChild(html.month(this.month));
+		this.monthContainer.appendChild(html.month(this.month, 'sc-table-current'));
 
 		container.appendChild(this.monthContainer);
 
@@ -366,8 +389,16 @@
 
 		// Change calendar
 		this.monthContainer.innerHTML = '';
-		this.monthContainer.appendChild(html.month(this.month));
+		this.monthContainer.appendChild(html.month(this.month, 'sc-table-current'));
 	}
+
+	// Set the selected date (cell click, `Today` button click, etc)
+	Supercal.prototype.selectDay = function(date) {
+		this.month.date = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+
+		// Redraw the calendar
+		this.setDate();
+	};
 
 	var methods = {
 		// Create a Supercal instance for this element from scratch
