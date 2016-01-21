@@ -1,5 +1,7 @@
 # SuperCal...
 
+# No longer maintained. Please find an alternative plugin.
+
 ## ...ifragilisticexpialidocious
 
 This is a Twitter Bootstrap (or plain CSS)-compatible jQuery calendar plugin. It can be configured to display either as a small widget, or display as a large grid for showing appointments and whatnot.
